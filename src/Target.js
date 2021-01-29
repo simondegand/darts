@@ -3,6 +3,7 @@ import React from 'react'
 class Target extends React.Component{
     constructor(props){
         super(props);
+        this.mouseMove = this.mouseMove.bind(this);
     }
 
     render() {
@@ -21,18 +22,40 @@ class Target extends React.Component{
             outsideArcs.push(this.getNextArc(outsideArcs[outsideArcs.length - 1], rotationAngle));
             insideArcs.push(this.getNextArc(insideArcs[insideArcs.length - 1], rotationAngle));
         }
-        return <svg width={size} height={size}>
+        return <svg width={size} height={size} onMouseMove={this.mouseMove}>
             {triangles.map(triangle => {
                 return <path fill={triangle.even ? black : white} d={`M${triangle.point1.x + radius} ${triangle.point1.y + radius} A${radius} ${radius} 0 0 1 ${triangle.point2.x + radius} ${triangle.point2.y + radius} L${radius} ${radius} Z`}/>
             })}
+            {outsideArcs.map((outsideArc, index) => {
+                return (
+                        <path fill={outsideArc.even ? red : green } 
+                            d={`M${outsideArc.point1.x + radius} ${outsideArc.point1.y + radius} 
+                            A${radius} ${radius} 0 0 1 ${outsideArc.point2.x + radius} ${outsideArc.point2.y + radius} 
+                            L${outsideArc.point3.x + radius} ${outsideArc.point3.y + radius} 
+                            A${radius} ${radius} 0 0 0 ${outsideArc.point4.x + radius} ${outsideArc.point4.y + radius} Z`}></path>
+                    );
+            })}
+            {insideArcs.map((insideArc, index) => {
+                return (
+                        <path fill={insideArc.even ? red : green } 
+                            d={`M${insideArc.point1.x + radius} ${insideArc.point1.y + radius} 
+                            A${radius} ${radius} 0 0 1 ${insideArc.point2.x + radius} ${insideArc.point2.y + radius} 
+                            L${insideArc.point3.x + radius} ${insideArc.point3.y + radius} 
+                            A${radius} ${radius} 0 0 0 ${insideArc.point4.x + radius} ${insideArc.point4.y + radius} Z`}></path>
+                    );
+            })}
         </svg>
     }
+    mouseMove(event){
+        this.props.mouseMoved(event.pageX, event.pageY)
+    }
+
+    //<path fill="${even ? green : red}" d="M${exteriorArc.x1 + radius} ${exteriorArc.y1 + radius} A${radius} ${radius} 0 0 1 ${exteriorArc.x2 + radius} ${exteriorArc.y2 + radius} L${exteriorArc.x3 + radius} ${exteriorArc.y3 + radius} A${radius} ${radius} 0 0 0 ${exteriorArc.x4 + radius} ${exteriorArc.y4 + radius}"/>
 
     getFirstTriangle(rotationAngle, radius){
         let x1 = -(Math.sin(rotationAngle/2) * radius);
         let x2 = 0 - x1;
         let y = -(Math.cos(rotationAngle/2) * radius);
-        console.log(x1, x2, y)
         return new Triangle(new Point(x1, y), new Point(x2, y), true);
     }
 
@@ -87,7 +110,6 @@ class Point{
 
 class Triangle{
     constructor(point1, point2, even){
-        console.log(point1)
         this.point1 = point1;
         this.point2 = point2;
         this.even = even;
