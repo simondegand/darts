@@ -4,16 +4,15 @@ class Target extends React.Component{
     constructor(props){
         super(props);
         this.mouseMove = this.mouseMove.bind(this);
-    }
-
-    render() {
-        const {size, arcThickness} = this.props;
+        this.mouseLeaving = this.mouseLeaving.bind(this);
+        const points = [20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5];
+        const {size, arcThickness} = props;
         const radius = size / 2;
         const rotationAngle = Math.PI / 10;
-        const black = '#000000'
-        const white = '#D9D4B6'
-        const red = ' #FC0108'
-        const green = '#028600'
+        const black = '#000000';
+        const white = '#D9D4B6';
+        const red = ' #FC0108';
+        const green = '#028600';
         let triangles = [this.getFirstTriangle(rotationAngle, radius)];
         let outsideArcs = [this.getFirstOutsideArc(rotationAngle, radius, arcThickness)];
         let insideArcs = [this.getFirstInsideArc(rotationAngle, radius, arcThickness)];
@@ -22,13 +21,15 @@ class Target extends React.Component{
             outsideArcs.push(this.getNextArc(outsideArcs[outsideArcs.length - 1], rotationAngle));
             insideArcs.push(this.getNextArc(insideArcs[insideArcs.length - 1], rotationAngle));
         }
-        return <svg width={size} height={size} onMouseMove={this.mouseMove}>
-            {triangles.map(triangle => {
-                return <path fill={triangle.even ? black : white} d={`M${triangle.point1.x + radius} ${triangle.point1.y + radius} A${radius} ${radius} 0 0 1 ${triangle.point2.x + radius} ${triangle.point2.y + radius} L${radius} ${radius} Z`}/>
+        this.svg = <svg width={size} height={size}>
+            {triangles.map((triangle, index) => {
+                let color = triangle.even ? black : white;
+                return <path onMouseMove={this.mouseMove.bind(this, points[index], color)} fill={color} d={`M${triangle.point1.x + radius} ${triangle.point1.y + radius} A${radius} ${radius} 0 0 1 ${triangle.point2.x + radius} ${triangle.point2.y + radius} L${radius} ${radius} Z`}/>
             })}
             {outsideArcs.map((outsideArc, index) => {
+                let color = outsideArc.even ? red : green;
                 return (
-                        <path fill={outsideArc.even ? red : green } 
+                        <path onMouseOut={this.mouseLeaving} onMouseMove={this.mouseMove.bind(this, points[index] * 2, color)} fill={color} 
                             d={`M${outsideArc.point1.x + radius} ${outsideArc.point1.y + radius} 
                             A${radius} ${radius} 0 0 1 ${outsideArc.point2.x + radius} ${outsideArc.point2.y + radius} 
                             L${outsideArc.point3.x + radius} ${outsideArc.point3.y + radius} 
@@ -36,21 +37,32 @@ class Target extends React.Component{
                     );
             })}
             {insideArcs.map((insideArc, index) => {
+                let color = insideArc.even ? red : green;
                 return (
-                        <path fill={insideArc.even ? red : green } 
+                        <path onMouseMove={this.mouseMove.bind(this, points[index] * 3, color)} fill={color} 
                             d={`M${insideArc.point1.x + radius} ${insideArc.point1.y + radius} 
                             A${radius} ${radius} 0 0 1 ${insideArc.point2.x + radius} ${insideArc.point2.y + radius} 
                             L${insideArc.point3.x + radius} ${insideArc.point3.y + radius} 
                             A${radius} ${radius} 0 0 0 ${insideArc.point4.x + radius} ${insideArc.point4.y + radius} Z`}></path>
                     );
             })}
+            
+            <circle onMouseMove={this.mouseMove.bind(this, 25, green)} fill={green} cx={radius} cy={radius} r="40"></circle>
+            <circle onMouseMove={this.mouseMove.bind(this, 50, red)} fill={red} cx={radius} cy={radius} r="20"></circle> 
         </svg>
     }
-    mouseMove(event){
-        this.props.mouseMoved(event.pageX, event.pageY)
+
+    render() {
+        return this.svg;
     }
 
-    //<path fill="${even ? green : red}" d="M${exteriorArc.x1 + radius} ${exteriorArc.y1 + radius} A${radius} ${radius} 0 0 1 ${exteriorArc.x2 + radius} ${exteriorArc.y2 + radius} L${exteriorArc.x3 + radius} ${exteriorArc.y3 + radius} A${radius} ${radius} 0 0 0 ${exteriorArc.x4 + radius} ${exteriorArc.y4 + radius}"/>
+    mouseLeaving(){
+        this.props.mouseLeaving();
+    }
+
+    mouseMove(points, color, event){
+        this.props.mouseMoved(event.pageX, event.pageY, points, color)
+    }
 
     getFirstTriangle(rotationAngle, radius){
         let x1 = -(Math.sin(rotationAngle/2) * radius);
