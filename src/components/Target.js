@@ -1,5 +1,9 @@
 import React from 'react';
-import { CreateId } from './utils';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { AddSelectedPoint } from '../redux/actions';
+import { CreateId } from '../others/utils';
+import {Point} from '../others/utils';
 
 const points = [20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5];
 
@@ -24,40 +28,39 @@ class Target extends React.Component{
         this.state.triangles = triangles;
         this.state.outsideArcs = outsideArcs;
         this.state.insideArcs = insideArcs;
-        this.mouseMove = this.mouseMove.bind(this);
-        this.mouseLeaving = this.mouseLeaving.bind(this);
-        this.getTargetSvg = this.getTargetSvg.bind(this);
     }
 
     render() {
         return this.state.mustReload ? this.getTargetSvg() : this.state.svg;
     }
 
+    componentDidUpdate(prevProps){
+        if(prevProps.selectedPoints !== this.props.selectedPoints){
+            this.setState({mustReload: true});
+        }
+    }
+
     getTargetSvg(){
-        console.log('getSvg')
         const {size} = this.props;
         const {triangles, insideArcs, outsideArcs} = this.state;
         const radius = size / 2;
         const black = '#000000';
         const white = '#D9D4B6';
-        const red = ' #FC0108';
+        const red = '#FC0108';
         const green = '#028600';
         
-        const svg = <svg width={size} height={size}>
+        const svg = <svg width={size} height={size} className="target-svg">
             {triangles.map((triangle, index) => {
                 let color = triangle.even ? black : white;
-                return <> 
-                        <path onClick={this.triangleClicked.bind(this, triangle)} onMouseMove={this.mouseMove.bind(this, points[index], color)} fill={color} 
+                return <path onClick={this.elementClicked.bind(this, points[index])} onMouseMove={this.mouseMove.bind(this, points[index], color)} fill={color} 
                             d={`M${triangle.point1.x + radius} ${triangle.point1.y + radius} 
                             A${radius} ${radius} 0 0 1 ${triangle.point2.x + radius} ${triangle.point2.y + radius} 
                             L${radius} ${radius} Z`}/>
-                        {triangle.selected ? <circle cx={triangle.selectedPosition.x} cy={triangle.selectedPosition.y} r="4" fill={red}/> : <></>}
-                    </>
             })}
             {outsideArcs.map((outsideArc, index) => {
                 let color = outsideArc.even ? red : green;
                 return (
-                        <path onMouseOut={this.mouseLeaving} onMouseMove={this.mouseMove.bind(this, points[index] * 2, color)} fill={color} 
+                        <path onClick={this.elementClicked.bind(this, points[index] * 2)} onMouseOut={this.mouseLeaving.bind(this)} onMouseMove={this.mouseMove.bind(this, points[index] * 2, color)} fill={color} 
                             d={`M${outsideArc.point1.x + radius} ${outsideArc.point1.y + radius} 
                             A${radius} ${radius} 0 0 1 ${outsideArc.point2.x + radius} ${outsideArc.point2.y + radius} 
                             L${outsideArc.point3.x + radius} ${outsideArc.point3.y + radius} 
@@ -67,7 +70,7 @@ class Target extends React.Component{
             {insideArcs.map((insideArc, index) => {
                 let color = insideArc.even ? red : green;
                 return (
-                        <path onMouseMove={this.mouseMove.bind(this, points[index] * 3, color)} fill={color} 
+                        <path onClick={this.elementClicked.bind(this, points[index] * 3)} onMouseMove={this.mouseMove.bind(this, points[index] * 3, color)} fill={color} 
                             d={`M${insideArc.point1.x + radius} ${insideArc.point1.y + radius} 
                             A${radius} ${radius} 0 0 1 ${insideArc.point2.x + radius} ${insideArc.point2.y + radius} 
                             L${insideArc.point3.x + radius} ${insideArc.point3.y + radius} 
@@ -75,8 +78,11 @@ class Target extends React.Component{
                     );
             })}
             
-            <circle onMouseMove={this.mouseMove.bind(this, 25, green)} fill={green} cx={radius} cy={radius} r="40"></circle>
-            <circle onMouseMove={this.mouseMove.bind(this, 50, red)} fill={red} cx={radius} cy={radius} r="20"></circle> 
+            <circle onClick={this.elementClicked.bind(this, 25)} onMouseMove={this.mouseMove.bind(this, 25, green)} fill={green} cx={radius} cy={radius} r="40"></circle>
+            <circle onClick={this.elementClicked.bind(this, 50)} onMouseMove={this.mouseMove.bind(this, 50, red)} fill={red} cx={radius} cy={radius} r="20"></circle> 
+            {this.props.selectedPoints.map(selectedPoint => {
+                return <circle fill={selectedPoint.hover ? 'yellow' : 'blue'} cx={selectedPoint.point.x} cy={selectedPoint.point.y} r="6" />
+            })}
         </svg>;
 
         this.setState({
@@ -86,12 +92,9 @@ class Target extends React.Component{
         return svg;
     }
 
-    triangleClicked(triangle, event){
-        let triangles = [...this.state.triangles];
-        let newTriangle = triangles.find(element => element.id === triangle.id);
-        newTriangle.selected = true;
-        newTriangle.selectedPosition = new Point(event.pageX, event.pageY);
-        this.setState({mustReload: true, triangles: triangles});
+    elementClicked(points, event){
+        this.props.addSelectedPoint(new Point(event.pageX, event.pageY), points);
+        //this.setState({mustReload: true});
     }
 
     mouseLeaving(){
@@ -151,21 +154,12 @@ class Target extends React.Component{
     }
 }
 
-class Point{
-    constructor(x, y){
-        this.x = x;
-        this.y = y;
-    }
-}
-
 class Triangle{
     constructor(point1, point2, even, points){
         this.point1 = point1;
         this.point2 = point2;
         this.even = even;
         this.points = points;
-        this.selected = false;
-        this.selectedPosition = {}
         this.id = CreateId();
     }
 }
@@ -178,14 +172,24 @@ class Arc {
         this.point4 = point4;
         this.even = even;
         this.points = points;
-        this.selected = false;
-        this.selectedPosition = {}
         this.id = CreateId();
     }
 }
 
-// Target.defaultProps = {
-//     size: 500, arcThickness: 30
-// }
+function mapStateToProps(store){
+    let selectedPoints = [];
 
-export default Target;
+    if(typeof store.selected.selectedPoints !== 'undefined'){
+        selectedPoints = store.selected.selectedPoints;
+    }
+
+    return {selectedPoints: selectedPoints}
+}
+
+function mapDispatchToProps(dispatch){
+    return bindActionCreators({
+        addSelectedPoint: AddSelectedPoint
+    }, dispatch);
+}
+
+export default connect(mapStateToProps, mapDispatchToProps) (Target);
