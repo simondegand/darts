@@ -2,13 +2,17 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { DeletePoint, SetHover } from '../redux/actions';
+import deleteIcon from '../images/delete.svg'
 
 
 class SelectedPoints extends React.Component{
     render(){
         const {points} = this.props;
         return points.map((point, index) => {
-            return <p onMouseOut={() => this.props.setHover(point, false)} onMouseOver={() => this.props.setHover(point, true)}>Point {index + 1} : ({point.point.x}, {point.point.y}) {point.points.toString().padStart(2, '0')} <button onClick={() => this.props.deletePoint(point)}>DELETE</button></p>
+            return <div onMouseOut={() => this.props.setHover(point, false)} onMouseOver={() => this.props.setHover(point, true)}>
+                <span>Point {index + 1} : ({point.point.x}, {point.point.y}) {point.points.toString().padStart(2, '0')}</span>
+                <button onClick={() => this.props.deletePoint(point)}><img src={deleteIcon}/></button>
+            </div>
         });
     }
 }
