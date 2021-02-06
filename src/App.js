@@ -6,6 +6,9 @@ import { Provider } from 'react-redux';
 import { createStore } from 'redux';
 import rootReducer from './redux/reducers';
 import SelectedPoints from './components/SelectedPoints';
+import { Switch, BrowserRouter as Router, Route } from 'react-router-dom';
+import PlayersPage from './pages/PlayersPage';
+import TargetPage from './pages/TargetPage';
 
 
 const store = createStore(rootReducer, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__());
@@ -31,12 +34,23 @@ class App extends React.Component {
     const {displayFollower, followerX, followerY, zoomX, zoomY, followerColor, followerPoints} = this.state;
     return (
       <Provider store={store}>
-        <Target size={500} arcThickness={30} mouseMoved={this.mouseMoved} mouseLeaving={this.hideFollower}/>
-        <Following display={displayFollower} zoomX={zoomX} zoomY={zoomY} x={followerX} y={followerY} mouseMoved={this.mouseMoved} size={this.zoomSize} mouseEnter={this.hideFollower} color={followerColor} points={followerPoints} />
-        <SelectedPoints/>
+        <Router>
+          <Switch>
+            <Route exact path="/">
+              <PlayersPage/>
+            </Route>
+            <Route path="/target">
+              <TargetPage/>
+            </Route>
+          </Switch>
+        </Router>
       </Provider>
     );
   }
+  
+  // <Target size={500} arcThickness={30} mouseMoved={this.mouseMoved} mouseLeaving={this.hideFollower}/>
+  // <Following display={displayFollower} zoomX={zoomX} zoomY={zoomY} x={followerX} y={followerY} mouseMoved={this.mouseMoved} size={this.zoomSize} mouseEnter={this.hideFollower} color={followerColor} points={followerPoints} />
+  // <SelectedPoints/>
 
   mouseMoved(x, y, points, color){
     if(typeof points === 'undefined') points = this.state.followerPoints;

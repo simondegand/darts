@@ -12,7 +12,7 @@ class SelectedPoints extends React.Component{
             return <div onMouseOut={() => this.props.setHover(point, false)} onMouseOver={() => this.props.setHover(point, true)}>
                 <span>Point {index + 1} : ({point.point.x}, {point.point.y}) {point.points.toString().padStart(2, '0')}</span>
                 <button onClick={() => this.props.deletePoint(point)}><img src={deleteIcon}/></button>
-            </div>
+            </div>;
         });
     }
 }
