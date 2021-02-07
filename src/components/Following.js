@@ -10,7 +10,7 @@ class Following extends React.Component{
     }
 
     render() {
-        const {size, mouseEnter, color, points, mouseMoved, x, y} = this.props;
+        const {size, mouseEnter, color, points, x, y} = this.props;
         const cursorSize = 100;
         const fontSize = 20;
         let fontColor = '#000000';
@@ -42,6 +42,9 @@ class Following extends React.Component{
     }
 
     getPointerAngle(x, y){
+        x -= this.props.padding;
+        y -= this.props.padding;
+        
         const A = basePointDart;
         const B = new Point(x, y);
         const C = new Point(250,250);

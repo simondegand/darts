@@ -1,5 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { AddPlayer } from '../redux/actions';
 
@@ -23,6 +24,9 @@ class PlayersPage extends React.Component{
                 <span>Joueur 1 : </span>
                 <input onKeyPress={(event) => event.code.includes('Enter') ? this.addPlayer() : false} value={this.state.nameToAdd} type="text" onChange={this.nameChanged.bind(this)} />
                 <button onClick={this.addPlayer.bind(this)}>Ajouter</button>
+            </div>
+            <div>
+                <Link to="/target">Commencer !</Link>
             </div>
         </div>
     }

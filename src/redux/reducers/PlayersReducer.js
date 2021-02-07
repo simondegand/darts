@@ -2,7 +2,8 @@ import { ADD_PLAYER } from "../actions"
 
 
 const initialState = {
-    players: []
+    players: [],
+    selectedPlayer: {}
 }
 
 export default function(state = initialState, action){
