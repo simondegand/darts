@@ -15,13 +15,13 @@ class PlayersPage extends React.Component{
     render(){
         const {players} = this.props;
         return <div>
-            {players && players.map(player => {
+            {players && players.map((player, index) => {
                 return <div>
-                    <span>{player.name}</span>
+                    <span>Joueur {index + 1} : {player.name}</span>
                 </div>
             })}
             <div>
-                <span>Joueur 1 : </span>
+                <span>Joueur {players.length + 1} : </span>
                 <input onKeyPress={(event) => event.code.includes('Enter') ? this.addPlayer() : false} value={this.state.nameToAdd} type="text" onChange={this.nameChanged.bind(this)} />
                 <button onClick={this.addPlayer.bind(this)}>Ajouter</button>
             </div>
@@ -36,8 +36,10 @@ class PlayersPage extends React.Component{
     }
 
     addPlayer(){
-        this.props.addPlayer({name: this.state.nameToAdd});
-        this.setState({nameToAdd: ''});
+        if(this.state.nameToAdd !== ''){
+            this.props.addPlayer({name: this.state.nameToAdd});
+            this.setState({nameToAdd: ''});
+        }
     }
 }
 

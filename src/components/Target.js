@@ -49,7 +49,7 @@ class Target extends React.Component{
         const red = '#FC0108';
         const green = '#028600';
         
-        const svg = <svg width={size} height={size} className="target-svg">
+        const svg = <svg onClick={this.setOffSet.bind(this)} width={size} height={size} className="target-svg">
             {triangles.map((triangle, index) => {
                 let color = triangle.even ? black : white;
                 return <path onClick={this.elementClicked.bind(this, points[index])} onMouseMove={this.mouseMove.bind(this, points[index], color)} fill={color} 
@@ -92,9 +92,19 @@ class Target extends React.Component{
         return svg;
     }
 
+    setOffSet(event){
+        this.setState({offSet: new Point(event.currentTarget.getBoundingClientRect().x, event.currentTarget.getBoundingClientRect().y)});
+    }
+
     elementClicked(points, event){
-        this.props.addSelectedPoint(new Point(event.pageX, event.pageY), points);
-        //this.setState({mustReload: true});
+        if(this.state.offSet){
+            this.props.addSelectedPoint(new Point(event.pageX - this.state.offSet.x, event.pageY - this.state.offSet.y), points);
+            this.setState({offSet: null});
+        }
+        else {
+            setTimeout(this.elementClicked.bind(this, points, event), 50);
+        }
+        
     }
 
     mouseLeaving(){
