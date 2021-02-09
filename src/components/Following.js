@@ -42,8 +42,8 @@ class Following extends React.Component{
     }
 
     getPointerAngle(x, y){
-        x -= this.props.padding;
-        y -= this.props.padding;
+        x -= this.props.offSet.x;
+        y -= this.props.offSet.y;
         
         const A = basePointDart;
         const B = new Point(x, y);

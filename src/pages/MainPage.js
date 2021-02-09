@@ -2,6 +2,7 @@ import React from 'react';
 import Target from '../components/Target';
 import Following from '../components/Following';
 import SelectedPoints from '../components/SelectedPoints';
+import { Point } from '../others/utils';
 
 class MainPage extends React.Component{
     constructor(props){
@@ -13,7 +14,8 @@ class MainPage extends React.Component{
             zoomX: 0,
             zoomY:0,
             followerColor: '#fff',
-            followerPoints: 0
+            followerPoints: 0,
+            offSet: new Point(0,0)
         }
         this.mouseMoved = this.mouseMoved.bind(this);
         this.hideFollower = this.hideFollower.bind(this);
@@ -21,9 +23,9 @@ class MainPage extends React.Component{
     }
 
     render(){
-        const {displayFollower, followerX, followerY, zoomX, zoomY, followerColor, followerPoints} = this.state;
+        const {displayFollower, followerX, followerY, zoomX, zoomY, followerColor, followerPoints, offSet} = this.state;
         return  <>
-            <Target size={500} arcThickness={30} mouseMoved={this.mouseMoved} mouseLeaving={this.hideFollower}/>
+            <Target size={500} arcThickness={30} mouseMoved={this.mouseMoved} mouseLeaving={this.hideFollower} setOffSet={this.setOffSet.bind(this)} offSet={offSet}/>
             <Following display={displayFollower} 
               zoomX={zoomX} 
               zoomY={zoomY} 
@@ -34,9 +36,13 @@ class MainPage extends React.Component{
               mouseEnter={this.hideFollower} 
               color={followerColor} 
               points={followerPoints}
-              padding={15} />
+              offSet={offSet} />
             <SelectedPoints/>
         </>;
+    }
+
+    setOffSet(event){
+        this.setState({offSet: new Point(event.currentTarget.getBoundingClientRect().x, event.currentTarget.getBoundingClientRect().y)});
     }
 
     mouseMoved(x, y, points, color){

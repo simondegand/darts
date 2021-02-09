@@ -9,3 +9,16 @@ body{
 button{
   margin-left:8px;
 }
+
+.targetElement text{
+  display: none;
+  pointer-events: none;
+}
+
+.targetElement:hover text{
+  display: block;
+}
+
+.targetElement:hover path{
+  fill: yellow;
+}

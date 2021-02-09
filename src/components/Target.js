@@ -49,32 +49,43 @@ class Target extends React.Component{
         const red = '#FC0108';
         const green = '#028600';
         
-        const svg = <svg onClick={this.setOffSet.bind(this)} width={size} height={size} className="target-svg">
+        const svg = <svg onMouseOver={this.props.setOffSet} width={size} height={size} className="target-svg">
             {triangles.map((triangle, index) => {
                 let color = triangle.even ? black : white;
-                return <path onClick={this.elementClicked.bind(this, points[index])} onMouseMove={this.mouseMove.bind(this, points[index], color)} fill={color} 
+                return <g className="targetElement">
+                        <path onClick={this.elementClicked.bind(this, points[index])} onMouseMove={this.mouseMove.bind(this, points[index], color)} fill={color} 
                             d={`M${triangle.point1.x + radius} ${triangle.point1.y + radius} 
                             A${radius} ${radius} 0 0 1 ${triangle.point2.x + radius} ${triangle.point2.y + radius} 
                             L${radius} ${radius} Z`}/>
+                        <text x="250" y="135">{points[index]}</text>
+                    </g>
             })}
             {outsideArcs.map((outsideArc, index) => {
                 let color = outsideArc.even ? red : green;
+                const pointText = new Point(((outsideArc.point1.x + outsideArc.point3.x) / 2) + 250, ((outsideArc.point1.y + outsideArc.point3.y) / 2) + 250)
                 return (
-                        <path onClick={this.elementClicked.bind(this, points[index] * 2)} onMouseOut={this.mouseLeaving.bind(this)} onMouseMove={this.mouseMove.bind(this, points[index] * 2, color)} fill={color} 
-                            d={`M${outsideArc.point1.x + radius} ${outsideArc.point1.y + radius} 
-                            A${radius} ${radius} 0 0 1 ${outsideArc.point2.x + radius} ${outsideArc.point2.y + radius} 
-                            L${outsideArc.point3.x + radius} ${outsideArc.point3.y + radius} 
-                            A${radius} ${radius} 0 0 0 ${outsideArc.point4.x + radius} ${outsideArc.point4.y + radius} Z`}></path>
+                        <g className="targetElement">
+                            <path onClick={this.elementClicked.bind(this, points[index] * 2)} onMouseOut={this.mouseLeaving.bind(this)} onMouseMove={this.mouseMove.bind(this, points[index] * 2, color)} fill={color} 
+                                d={`M${outsideArc.point1.x + radius} ${outsideArc.point1.y + radius} 
+                                A${radius} ${radius} 0 0 1 ${outsideArc.point2.x + radius} ${outsideArc.point2.y + radius} 
+                                L${outsideArc.point3.x + radius} ${outsideArc.point3.y + radius} 
+                                A${radius} ${radius} 0 0 0 ${outsideArc.point4.x + radius} ${outsideArc.point4.y + radius} Z`}></path>
+                            <text x={pointText.x} y={pointText.y}>{points[index] * 2}</text>
+                        </g>
                     );
             })}
             {insideArcs.map((insideArc, index) => {
                 let color = insideArc.even ? red : green;
+                const pointText = new Point(((insideArc.point1.x + insideArc.point3.x) / 2) + 250, ((insideArc.point1.y + insideArc.point3.y) / 2) + 250)
                 return (
-                        <path onClick={this.elementClicked.bind(this, points[index] * 3)} onMouseMove={this.mouseMove.bind(this, points[index] * 3, color)} fill={color} 
-                            d={`M${insideArc.point1.x + radius} ${insideArc.point1.y + radius} 
-                            A${radius} ${radius} 0 0 1 ${insideArc.point2.x + radius} ${insideArc.point2.y + radius} 
-                            L${insideArc.point3.x + radius} ${insideArc.point3.y + radius} 
-                            A${radius} ${radius} 0 0 0 ${insideArc.point4.x + radius} ${insideArc.point4.y + radius} Z`}></path>
+                        <g className="targetElement">
+                            <path onClick={this.elementClicked.bind(this, points[index] * 3)} onMouseMove={this.mouseMove.bind(this, points[index] * 3, color)} fill={color} 
+                                d={`M${insideArc.point1.x + radius} ${insideArc.point1.y + radius} 
+                                A${radius} ${radius} 0 0 1 ${insideArc.point2.x + radius} ${insideArc.point2.y + radius} 
+                                L${insideArc.point3.x + radius} ${insideArc.point3.y + radius} 
+                                A${radius} ${radius} 0 0 0 ${insideArc.point4.x + radius} ${insideArc.point4.y + radius} Z`}></path>
+                            <text x={pointText.x} y={pointText.y}>{points[index] * 3}</text>
+                        </g>
                     );
             })}
             
@@ -92,19 +103,8 @@ class Target extends React.Component{
         return svg;
     }
 
-    setOffSet(event){
-        this.setState({offSet: new Point(event.currentTarget.getBoundingClientRect().x, event.currentTarget.getBoundingClientRect().y)});
-    }
-
     elementClicked(points, event){
-        if(this.state.offSet){
-            this.props.addSelectedPoint(new Point(event.pageX - this.state.offSet.x, event.pageY - this.state.offSet.y), points);
-            this.setState({offSet: null});
-        }
-        else {
-            setTimeout(this.elementClicked.bind(this, points, event), 50);
-        }
-        
+        this.props.addSelectedPoint(new Point(event.pageX - this.props.offSet.x, event.pageY - this.props.offSet.y), points);
     }
 
     mouseLeaving(){
